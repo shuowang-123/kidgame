@@ -102,6 +102,7 @@ function mound(c){c.fillStyle="rgba(40,80,20,.22)";ell(c,0,6,48,13);c.fill();c.f
   c.fillStyle="rgba(255,255,255,.18)";ell(c,-8,-1,14,3);c.fill();}
 
 function drawPlant(c,type,x,y,s,t,p){
+  if(THEME==="princess"){drawDoll(c,type,x,y,s,t,p);return;}
   c.save();c.translate(x,y);c.scale(s,s);
   const blink=((t+(p?p.seed:0))%4.2)<.13;
   let hurt=p&&p.hurtT>0?Math.sin(p.hurtT*60)*3:0;c.translate(hurt,0);
@@ -159,6 +160,109 @@ function drawPlant(c,type,x,y,s,t,p){
   c.restore();}
 function drawSnowflake(c,x,y,r,col){c.save();c.translate(x,y);c.strokeStyle=col;c.lineWidth=Math.max(1.5,r*.22);c.lineCap="round";
   for(let i=0;i<6;i++){c.rotate(TAU/6);c.beginPath();c.moveTo(0,0);c.lineTo(0,-r);c.moveTo(0,-r*.55);c.lineTo(r*.3,-r*.8);c.moveTo(0,-r*.55);c.lineTo(-r*.3,-r*.8);c.stroke();}c.restore();}
+
+/* ---------- princess doll theme ---------- */
+let THEME=store.get("theme","princess");
+const DOLLNAME={
+  star:{name:"星星公主",say:"星星公主！她会送你星星哦"},
+  bubble:{name:"泡泡公主",say:"泡泡公主！她会吹爱心泡泡"},
+  mush:{name:"抱抱熊",say:"抱抱熊！它可以挡住果冻哦"},
+  snow:{name:"雪花公主",say:"雪花公主！她让果冻慢慢走"},
+  dande:{name:"扇子公主",say:"扇子公主！呼——把果冻都扇回去"}
+};
+function PN(k){return THEME==="princess"?DOLLNAME[k]:PLANTS[k];}
+const DOLL={
+  star:{dress:["#fff6c2","#ffd43b","#e09a00"],hair:["#ffe39a","#f0b33c"],prop:"star"},
+  bubble:{dress:["#ffe0ee","#ff86b5","#d9467f"],hair:["#b8743f","#7f4a24"],prop:"heart"},
+  snow:{dress:["#eefaff","#8fd3ff","#3793cc"],hair:["#f7fbff","#bccbe6"],prop:"snow"},
+  dande:{dress:["#f3e8ff","#b994ff","#7148d6"],hair:["#5a3d63","#33213b"],prop:"fan"}
+};
+function heartPath(c,x,y,s){c.beginPath();c.moveTo(x,y+s*.35);c.bezierCurveTo(x-s,y-s*.3,x-s*.45,y-s,x,y-s*.45);c.bezierCurveTo(x+s*.45,y-s,x+s,y-s*.3,x,y+s*.35);c.closePath();}
+function tiara(c,x,y,s){c.save();c.translate(x,y);c.scale(s,s);c.beginPath();c.moveTo(-14,4);c.lineTo(-16,-8);c.lineTo(-7,-2);c.lineTo(0,-14);c.lineTo(7,-2);c.lineTo(16,-8);c.lineTo(14,4);c.quadraticCurveTo(0,0,-14,4);c.closePath();
+  c.fillStyle=linear(c,0,-14,0,4,["#fff6b0","#ffc21a"]);c.fill();c.strokeStyle="#d48a00";c.lineWidth=2;c.stroke();c.fillStyle="#ff5f9f";circ(c,0,-4,3);c.fill();c.fillStyle="#fff";circ(c,-1,-5,1);c.fill();c.restore();}
+function drawBear(c,t,p,blink){const hp=p?p.hp/p.max:1;const sq=Math.sin(t*2.4+(p?p.seed:0))*.03;c.scale(1.12+sq,1.12-sq);
+  const fur=["#e7b27a","#b97a45"],dk="#9a6334";
+  c.fillStyle=fur[1];ell(c,-18,-5,13,9);c.fill();ell(c,18,-5,13,9);c.fill();
+  c.fillStyle=linear(c,0,-62,0,0,fur);ell(c,0,-30,34,32);c.fill();c.strokeStyle=dk;c.lineWidth=3;c.stroke();
+  c.fillStyle="#f8e2c2";ell(c,0,-25,20,19);c.fill();
+  c.fillStyle=fur[1];ell(c,-31,-38,10,15,.5);c.fill();ell(c,31,-38,10,15,-.5);c.fill();
+  for(const sx of[-1,1]){c.fillStyle=fur[1];circ(c,sx*24,-102,12);c.fill();c.strokeStyle=dk;c.lineWidth=3;c.stroke();c.fillStyle="#ffb3c8";circ(c,sx*24,-102,6);c.fill();}
+  c.fillStyle=linear(c,0,-110,0,-48,fur);circ(c,0,-78,31);c.fill();c.strokeStyle=dk;c.lineWidth=3;c.stroke();
+  c.fillStyle="#f8e2c2";ell(c,0,-68,14,10);c.fill();
+  face(c,0,-82,.72,{mood:hp<.4?"worry":"happy",blink});
+  c.fillStyle="#4a2a1a";ell(c,0,-73,5,3.5);c.fill();
+  // bow tie
+  c.fillStyle="#ff6fa5";c.beginPath();c.moveTo(0,-50);c.lineTo(-14,-58);c.lineTo(-14,-42);c.closePath();c.fill();c.beginPath();c.moveTo(0,-50);c.lineTo(14,-58);c.lineTo(14,-42);c.closePath();c.fill();c.fillStyle="#ff4f8f";circ(c,0,-50,4.5);c.fill();
+  if(hp<.35){c.save();c.translate(-18,-92);c.rotate(-.5);c.fillStyle="#ffe0b8";rr(c,-14,-6,28,12,5);c.fill();c.strokeStyle="#e5b27c";c.lineWidth=2;c.stroke();c.restore();}}
+function drawDoll(c,type,x,y,s,t,p){
+  c.save();c.translate(x,y);c.scale(s,s);
+  const blink=((t+(p?p.seed:0))%4.2)<.13;
+  if(p&&p.hurtT>0)c.translate(Math.sin(p.hurtT*60)*3,0);
+  if(p&&p.bornT<.35){const k=easeBack(clamp(p.bornT/.35,0,1));c.scale(.4+.6*k,.2+.8*k);}
+  if(!p||!p.noMound){c.fillStyle="rgba(40,80,20,.2)";ell(c,0,4,44,11);c.fill();c.fillStyle="rgba(255,255,255,.5)";ell(c,0,1,32,7);c.fill();}
+  if(type==="mush"){drawBear(c,t,p,blink);c.restore();return;}
+  const D=DOLL[type],seed=p?p.seed:0;
+  const sh=p&&p.shootT>0?p.shootT/.18:0, charge=type==="dande"&&p?clamp(1-p.timer/.9,0,1):0;
+  const sway=Math.sin(t*2+seed)*1.5;
+  c.translate(0,Math.sin(t*2.2+seed)*1.2);
+  // shoes
+  c.fillStyle="#ff6f9f";ell(c,-10,-3,8,5);c.fill();ell(c,10,-3,8,5);c.fill();
+  // long hair behind
+  c.fillStyle=D.hair[1];c.beginPath();c.moveTo(-26,-92);c.quadraticCurveTo(-34,-58,-24+sway,-44);c.lineTo(24+sway,-44);c.quadraticCurveTo(34,-58,26,-92);c.closePath();c.fill();
+  // dress
+  c.beginPath();c.moveTo(-13,-66);c.quadraticCurveTo(-20,-40,-41+sway,-11);
+  for(let i=0;i<5;i++){const x0=-41+i*16.4+sway;c.quadraticCurveTo(x0+8.2,3,x0+16.4,-11);}
+  c.quadraticCurveTo(20,-40,13,-66);c.closePath();
+  c.fillStyle=linear(c,0,-66,0,0,[D.dress[0],D.dress[1]]);c.fill();c.strokeStyle=D.dress[2];c.lineWidth=3;c.stroke();
+  c.strokeStyle="rgba(255,255,255,.9)";c.lineWidth=3;c.beginPath();for(let i=0;i<5;i++){const x0=-38+i*15.2+sway;c.moveTo(x0,-14);c.quadraticCurveTo(x0+7.6,-6,x0+15.2,-14);}c.stroke();
+  c.fillStyle="rgba(255,255,255,.75)";for(const[a,b]of[[-16,-30],[8,-22],[18,-38],[-4,-44]]){starPath(c,a+sway*.5,b,3.5,1.6,4,t);c.fill();}
+  // bodice + sash
+  c.fillStyle=D.dress[1];rr(c,-13,-76,26,24,9);c.fill();c.strokeStyle=D.dress[2];c.lineWidth=2.5;c.stroke();
+  c.fillStyle="#fff";rr(c,-15,-56,30,7,3.5);c.fill();
+  c.fillStyle="#ff6fa5";c.beginPath();c.moveTo(0,-52);c.lineTo(-9,-58);c.lineTo(-9,-47);c.closePath();c.fill();c.beginPath();c.moveTo(0,-52);c.lineTo(9,-58);c.lineTo(9,-47);c.closePath();c.fill();circ(c,0,-52,3);c.fill();
+  // puff sleeves + arms
+  c.fillStyle=D.dress[0];c.strokeStyle=D.dress[2];c.lineWidth=2;circ(c,-14,-72,7);c.fill();c.stroke();circ(c,14,-72,7);c.fill();c.stroke();
+  c.strokeStyle="#ffd9c2";c.lineWidth=6;c.lineCap="round";c.beginPath();c.moveTo(-16,-68);c.lineTo(-23,-50);c.stroke();
+  const ra=type==="dande"?-.2-charge*.5:-.6-sh*.4;const hx=16+Math.cos(ra)*18,hy=-70+Math.sin(ra)*18;
+  c.beginPath();c.moveTo(16,-70);c.lineTo(hx,hy);c.stroke();
+  c.fillStyle="#ffe6d5";circ(c,-23,-49,4.5);c.fill();
+  // prop
+  if(D.prop==="fan"){c.save();c.translate(hx,hy);c.rotate(-.5+Math.sin(t*(charge>0?20:2))*(.15+charge*.3));
+    c.beginPath();c.moveTo(0,0);c.arc(0,0,30,-PI*.95,-PI*.05);c.closePath();c.fillStyle=linear(c,-30,0,30,0,["#ffd1e6","#ff86b5","#ffd1e6"]);c.fill();c.strokeStyle="#d9467f";c.lineWidth=2;c.stroke();
+    c.strokeStyle="rgba(217,70,127,.6)";c.lineWidth=1.5;for(let i=1;i<6;i++){const a=-PI*.95+i*PI*.9/6;c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(a)*30,Math.sin(a)*30);c.stroke();}c.restore();}
+  else{const tx=hx+8,ty=hy-22;c.strokeStyle="#fff";c.lineWidth=4;c.beginPath();c.moveTo(hx,hy);c.lineTo(tx,ty);c.stroke();c.strokeStyle="#e0c060";c.lineWidth=2;c.stroke();
+    c.save();c.translate(tx,ty);c.rotate(Math.sin(t*3)*.2);
+    if(sh>0||(p&&p.timer<.6&&type==="star")){c.fillStyle="rgba(255,250,180,.6)";circ(c,0,0,16);c.fill();}
+    if(D.prop==="star"){starPath(c,0,0,12,6);c.fillStyle="#ffe14d";c.fill();c.strokeStyle="#f08400";c.lineWidth=2;c.stroke();}
+    else if(D.prop==="heart"){heartPath(c,0,2,13);c.strokeStyle="#ff4f8f";c.lineWidth=4;c.stroke();c.fillStyle="rgba(255,220,240,.5)";c.fill();}
+    else{drawSnowflake(c,0,0,11,"#3aa7e0");drawSnowflake(c,0,0,7,"#fff");}
+    c.restore();}
+  c.fillStyle="#ffe6d5";circ(c,hx,hy,4.5);c.fill();
+  // head
+  c.fillStyle=D.hair[1];circ(c,0,-94,27);c.fill();
+  c.fillStyle=radial(c,0,-90,24,["#fff3ea","#ffe0cc"]);circ(c,0,-89,22);c.fill();c.strokeStyle="#f0bfa0";c.lineWidth=2;c.stroke();
+  // bangs
+  c.fillStyle=linear(c,0,-120,0,-90,[D.hair[0],D.hair[1]]);c.beginPath();c.moveTo(-25,-90);c.quadraticCurveTo(-28,-122,0,-121);c.quadraticCurveTo(28,-122,25,-90);
+  c.quadraticCurveTo(18,-104,10,-100);c.quadraticCurveTo(4,-108,-4,-101);c.quadraticCurveTo(-14,-108,-25,-90);c.closePath();c.fill();
+  c.fillStyle="rgba(255,255,255,.35)";ell(c,-10,-114,8,3,-.3);c.fill();
+  // side curls
+  c.fillStyle=D.hair[0];circ(c,-25,-80,7);c.fill();circ(c,25,-80,7);c.fill();circ(c,-27,-66,6);c.fill();circ(c,27,-66,6);c.fill();
+  face(c,0,-85,.62,{mood:charge>.05||sh>0?"blow":(p&&p.timer<.6&&type==="star")?"joy":"happy",blink,look:type==="dande"||type==="star"?0:1});
+  tiara(c,0,-120,1);
+  c.restore();}
+function drawCastle(g,x,y,s){g.save();g.translate(x,y);g.scale(s,s);
+  const wall=["#fff0f7","#ffc9e0"],roof=["#c9a4ff","#9b6dff"];
+  const tower=(tx,tw,th)=>{g.fillStyle=linear(g,0,-th,0,0,wall);rr(g,tx-tw/2,-th,tw,th,6);g.fill();g.strokeStyle="#f3a6c8";g.lineWidth=3;g.stroke();
+    g.fillStyle=linear(g,0,-th-tw,0,-th,roof);g.beginPath();g.moveTo(tx-tw/2-8,-th+2);g.lineTo(tx,-th-tw*1.3);g.lineTo(tx+tw/2+8,-th+2);g.closePath();g.fill();
+    g.strokeStyle="#7b4fe0";g.lineWidth=2;g.beginPath();g.moveTo(tx,-th-tw*1.3);g.lineTo(tx,-th-tw*1.3-22);g.stroke();g.fillStyle="#ff6fa5";g.beginPath();g.moveTo(tx,-th-tw*1.3-22);g.lineTo(tx+18,-th-tw*1.3-16);g.lineTo(tx,-th-tw*1.3-10);g.fill();
+    g.fillStyle="#8fd3ff";rr(g,tx-7,-th+18,14,20,7);g.fill();};
+  tower(-95,46,120);tower(95,46,120);
+  g.fillStyle=linear(g,0,-100,0,0,wall);g.fillRect(-75,-95,150,95);g.strokeStyle="#f3a6c8";g.lineWidth=3;g.strokeRect(-75,-95,150,95);
+  g.fillStyle=wall[0];for(let i=0;i<6;i++){g.fillRect(-75+i*27,-108,16,14);}
+  tower(0,58,150);
+  g.fillStyle="#c98ad8";g.beginPath();g.moveTo(-22,0);g.lineTo(-22,-30);g.arc(0,-30,22,PI,0);g.lineTo(22,0);g.fill();
+  g.fillStyle="#ff6fa5";heartPath(g,0,-60,14);g.fill();
+  g.restore();}
 
 /* ---------- jellies ---------- */
 const JELLY={
@@ -298,7 +402,7 @@ let buttons=[],pressed=null;
 
 function startLevel(i,skipIntro){
   const L=LEVELS[i];G.lvl=i;G.L=L;
-  if(!skipIntro&&L.intro&&!prog.seen[L.intro]){G.screen="friend";G.friend=L.intro;G.friendT=0;say("新朋友，"+PLANTS[L.intro].say,true);SFX.win();return;}
+  if(!skipIntro&&L.intro&&!prog.seen[L.intro]){G.screen="friend";G.friend=L.intro;G.friendT=0;say("新朋友，"+PN(L.intro).say,true);SFX.win();return;}
   grid=[];for(let r=0;r<ROWS;r++)grid.push(new Array(COLS).fill(null));
   plants=[];enemies=[];proj=[];stars=[];parts=[];texts=[];
   G.sun=150;G.time=0;G.sched=makeSchedule(L);G.si=0;G.total=G.sched.filter(e=>!e.flag).length;G.spawned=0;G.slept=0;
@@ -306,7 +410,7 @@ function startLevel(i,skipIntro){
   G.cards=CARD_ORDER.slice(0,L.cards).map(k=>({k,cd:0,shake:0}));G.sel=null;G.skyT=4;G.idle=0;G.endT=0;G.result=null;
   G.banner={text:"第"+(i+1)+"关",sub:"种花，保护蛋糕！",t:0,dur:2.6};G.sunBump=0;G.saidSleep=false;G.saidSteal=0;
   G.screen="play";G.paused=false;bgDirty=true;
-  if(i===0)say("果冻要来偷蛋糕啦！先种星星花吧！",true);
+  if(i===0)say("果冻要来偷蛋糕啦！先种"+PN("star").name+"吧！",true);
   else if(L.introJ==="fast")say("小心，跳跳果冻跑得很快哦！",true);
   else if(L.introJ==="king")say("果冻大王要来啦！多种一些泡泡花吧！",true);
   else say("第"+(i+1)+"关，加油！",true);
@@ -438,7 +542,7 @@ function tapCard(cd){const P=PLANTS[cd.k];
   if(G.sel===cd.k){G.sel=null;SFX.tap();return;}
   if(cd.cd>0){cd.shake=.4;SFX.no();say("等一下下哦");return;}
   if(G.sun<P.cost){cd.shake=.4;SFX.no();say("星星不够哦，再收集一些吧");G.hintNow=2;return;}
-  G.sel=cd.k;SFX.select();say(P.name);}
+  G.sel=cd.k;SFX.select();say(PN(cd.k).name);}
 cv.addEventListener("pointerdown",e=>{e.preventDefault();const p=toLogical(e.clientX,e.clientY);onTap(p.x,p.y);},{passive:false});
 document.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
 document.addEventListener("gesturestart",e=>e.preventDefault());
@@ -450,7 +554,7 @@ function renderBG(){
   const w=Math.ceil(LW*SC*DPR),h=Math.ceil(LH*SC*DPR);
   if(!bg)bg=document.createElement("canvas");bg.width=w;bg.height=h;const g=bg.getContext("2d");g.setTransform(SC*DPR,0,0,SC*DPR,0,0);
   const rows=G.screen==="play"&&G.L?G.L.rows:[0,1,2,3,4];
-  g.fillStyle=linear(g,0,0,0,260,["#7fd0ff","#bfe9ff","#e6f8ff"]);g.fillRect(0,0,LW,LH);
+  const PR=THEME==="princess";g.fillStyle=linear(g,0,0,0,260,PR?["#8fd0ff","#d4e2ff","#ffe4f2"]:["#7fd0ff","#bfe9ff","#e6f8ff"]);g.fillRect(0,0,LW,LH);
   // sun
   const sx=LW/2+250,sy=64;g.fillStyle="rgba(255,240,170,.5)";circ(g,sx,sy,78);g.fill();g.fillStyle=radial(g,sx,sy,52,["#fffbe0","#ffe066","#ffc928"]);circ(g,sx,sy,52);g.fill();
   // hills
@@ -458,6 +562,7 @@ function renderBG(){
   g.fillStyle="#94dd6b";g.beginPath();g.moveTo(0,220);for(let x=0;x<=LW;x+=40)g.lineTo(x,178+Math.sin(x*.009+2)*18);g.lineTo(LW,260);g.lineTo(0,260);g.fill();
   // little trees on hills
   for(let i=0;i<9;i++){const x=(i*233+90)%LW,y=176+Math.sin(x*.009+2)*18;g.fillStyle="#7c5a3a";g.fillRect(x-3,y-14,6,16);g.fillStyle=["#5fc45a","#4fb04f","#77d06a"][i%3];circ(g,x,y-22,16);g.fill();circ(g,x-10,y-14,11);g.fill();circ(g,x+10,y-14,11);g.fill();}
+  if(PR)drawCastle(g,LX+COLS*CELL*.62,TOPY-14,.95);
   // ground
   g.fillStyle=linear(g,0,TOPY-12,0,LH,["#79c94f","#5fb33f"]);g.fillRect(0,TOPY-12,LW,LH);
   // path on the right
@@ -467,7 +572,7 @@ function renderBG(){
   for(let i=0;i<5;i++){const x=LW-safeR-40-(i%2)*50,y=TOPY+60+i*150;if(x<px+40)continue;g.fillStyle="#fff4e0";rr(g,x-8,y-6,16,24,6);g.fill();g.fillStyle=["#ff8fb8","#b994ff","#8fd3ff"][i%3];ell(g,x,y-8,26,18);g.fill();g.fillStyle="#fff";circ(g,x-8,y-12,4);g.fill();circ(g,x+8,y-6,3);g.fill();}
   // lawn tiles
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const x=LX+c*CELL,y=TOPY+r*CELL;const act=rows.includes(r);
-    if(act){g.fillStyle=(r+c)%2?"#93db63":"#84d055";rr(g,x+3,y+3,CELL-6,CELL-6,22);g.fill();g.fillStyle="rgba(255,255,255,.12)";rr(g,x+8,y+6,CELL-16,22,12);g.fill();}
+    if(act){g.fillStyle=PR?((r+c)%2?"#a3e27a":"#93d96c"):((r+c)%2?"#93db63":"#84d055");rr(g,x+3,y+3,CELL-6,CELL-6,22);g.fill();g.fillStyle="rgba(255,255,255,.12)";rr(g,x+8,y+6,CELL-16,22,12);g.fill();}
     else{g.fillStyle=(r+c)%2?"#c79a62":"#bd8f57";rr(g,x+3,y+3,CELL-6,CELL-6,22);g.fill();}}
   // grass tufts and tiny flowers
   let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
@@ -479,11 +584,11 @@ function renderBG(){
     g.fillStyle="#9c6f3e";ell(g,x,y+20,40,10);g.fill();g.fillStyle="#5fb33f";for(const d of[-18,0,18]){g.beginPath();g.ellipse(x+d,y+5,6,14,d*.03,0,TAU);g.fill();}
     g.fillStyle=["#ff8fb8","#ffd43b","#b994ff"][(r+c)%3];circ(g,x,y-10,9);g.fill();g.fillStyle="#fff";circ(g,x,y-10,3.5);g.fill();}
   // fence along top
-  for(let x=LX-150;x<px;x+=34){g.fillStyle="#fffaf0";rr(g,x,TOPY-44,22,40,8);g.fill();g.strokeStyle="#e3d3b8";g.lineWidth=2;g.stroke();}
+  for(let x=LX-150;x<px;x+=34){g.fillStyle=PR?"#ffe3f0":"#fffaf0";rr(g,x,TOPY-44,22,40,8);g.fill();g.strokeStyle="#e3d3b8";g.lineWidth=2;g.stroke();}
   g.fillStyle="#fffaf0";rr(g,LX-150,TOPY-32,px-LX+150,8,4);g.fill();
   // picnic blanket on the left
   const bx=LX-146,bw=136;g.save();rr(g,bx,TOPY+4,bw,ROWS*CELL-8,20);g.clip();g.fillStyle="#fff";g.fillRect(bx,TOPY,bw,ROWS*CELL);
-  g.fillStyle="rgba(255,110,140,.55)";for(let k=0;k<12;k++){g.fillRect(bx+k*24,TOPY,12,ROWS*CELL);}for(let k=0;k<30;k++){g.fillRect(bx,TOPY+k*24,bw,12);}g.restore();
+  g.fillStyle=PR?"rgba(185,140,255,.5)":"rgba(255,110,140,.55)";for(let k=0;k<12;k++){g.fillRect(bx+k*24,TOPY,12,ROWS*CELL);}for(let k=0;k<30;k++){g.fillRect(bx,TOPY+k*24,bw,12);}g.restore();
   g.strokeStyle="#f07090";g.lineWidth=4;rr(g,bx,TOPY+4,bw,ROWS*CELL-8,20);g.stroke();
   for(let r=0;r<ROWS;r++){const y=rowY(r)+30;g.fillStyle="rgba(0,0,0,.12)";ell(g,LX-78,y+4,50,14);g.fill();g.fillStyle="#fff";ell(g,LX-78,y,48,13);g.fill();g.strokeStyle="#d9e4ee";g.lineWidth=3;g.stroke();}
   // lower border
@@ -506,7 +611,7 @@ function drawStarItem(c,s,t){c.save();c.translate(s.x,s.y+(s.mode==="rest"?Math.
 function drawBubbleProj(c,b,t){c.save();c.translate(b.x,b.y+Math.sin(b.t*14)*3);
   if(b.k==="snow"){c.rotate(b.t*6);c.fillStyle="rgba(200,240,255,.5)";circ(c,0,0,16);c.fill();drawSnowflake(c,0,0,14,"#ffffff");drawSnowflake(c,0,0,9,"#8fd3ff");}
   else{c.fillStyle=radial(c,0,0,15,["rgba(255,255,255,.95)","rgba(255,200,230,.55)","rgba(255,120,180,.6)"]);circ(c,0,0,15);c.fill();c.strokeStyle="rgba(255,255,255,.95)";c.lineWidth=2.5;c.stroke();
-    c.fillStyle="#fff";ell(c,-5,-6,4,2.6,-.6);c.fill();}
+    c.fillStyle="#fff";ell(c,-5,-6,4,2.6,-.6);c.fill();if(THEME==="princess"){c.fillStyle="rgba(255,90,160,.75)";heartPath(c,1,2,8);c.fill();}}
   c.restore();}
 function drawEnemy(c,e,t){c.save();c.translate(e.x,e.y);
   if(e.state==="sleep"){const a=e.life>3.2?clamp(1-(e.life-3.2),0,1):1;c.globalAlpha=a;}
@@ -588,7 +693,7 @@ function drawTopBar(t){
     ctx.restore();});
   // shovel
   const sx=BARX+176+nCards*126+4,sy=34;const ss=G.sel==="shovel";
-  buttons.push({id:"shovel",x:sx,y:sy,w:104,h:104,fn:()=>{G.sel=G.sel==="shovel"?null:"shovel";SFX.select();if(G.sel)say("小铲子，可以把花挖走");}});
+  buttons.push({id:"shovel",x:sx,y:sy,w:104,h:104,fn:()=>{G.sel=G.sel==="shovel"?null:"shovel";SFX.select();if(G.sel)say("小铲子，可以把它挖走");}});
   ctx.save();ctx.translate(sx+52,sy+52+(ss?-6:0));ctx.fillStyle=ss?"#ffe58a":"#e9dcc8";circ(ctx,0,0,48);ctx.fill();ctx.strokeStyle=ss?"#ffb300":"#c9a77a";ctx.lineWidth=5;ctx.stroke();shovelIcon(ctx,70);ctx.restore();
   // right side: progress + music + pause
   const rx=LW-safeR-16;
@@ -656,7 +761,7 @@ function drawTitle(t){
   ["jelly","fast","hat","king"].forEach((k,i)=>{ctx.save();const x=LX+COLS*CELL-80-i*150+Math.sin(t+i)*10,y=rowY(i%2?4:3)+70;ctx.translate(x,y-Math.abs(Math.sin(t*3+i))*14);ctx.scale(JELLY[k].s*.95,JELLY[k].s*.95);ctx.fillStyle="rgba(0,0,0,.15)";ell(ctx,0,4,46,12);ctx.fill();drawJellyBody(ctx,k,t,i,{mood:"cheeky",hat:k==="hat"});ctx.restore();});
   for(const f of flies)drawFly(ctx,f,t);
   // title
-  const title="花花守护队";ctx.save();ctx.translate(LW/2,240);
+  const title=THEME==="princess"?"公主守护队":"花花守护队";ctx.save();ctx.translate(LW/2,240);
   const cols=["#ff6fa5","#ffa63a","#ffcf2e","#5fd35a","#4fb5f0"];
   for(let i=0;i<5;i++){const x=(i-2)*150,y=Math.sin(t*3+i*.8)*10;ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(t*2+i)*.06);
     txt(ctx,title[i],0,8,150,"rgba(0,0,0,.15)",null);txt(ctx,title[i],0,0,150,cols[i],"#fff",null,26);ctx.restore();}
@@ -666,7 +771,12 @@ function drawTitle(t){
   button("play",LW/2-170,440,340,130,GREEN,()=>{initAudio();SFX.select();go("map");say("选一关吧！",true);},(c)=>{c.save();c.translate(-80,0);playIcon(c,70);c.restore();txt(c,"开始",30,2,60,"#fff","rgba(0,0,0,.15)",null,10);});
   ctx.restore();
   button("tmusic",LW-safeR-120,24,92,92,musicOn?PURPLE:["#ddd","#aaa"],()=>{initAudio();setMusic(!musicOn);},(c)=>noteIcon(c,54,musicOn));
-  hand(ctx,LW/2+150,560,t);
+  const themeBtn=(id,x,th,label)=>{const on=THEME===th;ctx.save();if(on){ctx.fillStyle="rgba(255,255,180,"+(.55+.2*Math.sin(t*5))+")";rr(ctx,x-10,430,200,160,40);ctx.fill();}ctx.restore();
+    button(id,x,440,180,140,on?(th==="princess"?PINK:GREEN):["#f4f4f8","#d6d8e4"],()=>{initAudio();if(THEME!==th){THEME=th;store.set("theme",th);bgDirty=true;SFX.select();say(th==="princess"?"公主守护队！":"花花守护队！",true);}},
+      (c)=>{c.save();c.beginPath();rr(c,-86,-66,172,132,36);c.clip();if(th==="princess")drawDoll(c,"bubble",0,40,.82,t,{seed:3,noMound:true,timer:9,hp:1,max:1,bornT:1,hurtT:0});else{const sv=THEME;THEME="flower";drawPlant(c,"star",0,36,.82,t,{seed:3,noMound:true,timer:9,hp:1,max:1,bornT:1,hurtT:0});THEME=sv;}c.restore();
+        txt(c,label,0,48,34,"#fff","rgba(0,0,0,.25)",null,7);});};
+  themeBtn("thf",LW/2-420,"flower","花花");themeBtn("thp",LW/2+240,"princess","公主");
+  hand(ctx,LW/2+120,560,t);
 }
 function mapNode(i){const n=LEVELS.length;const x0=safeL+150,x1=LW-safeR-150;return{x:lerp(x0,x1,i/(n-1)),y:i%2?640:430};}
 function drawMap(t){
@@ -699,7 +809,7 @@ function drawFriend(t,dt){G.friendT+=dt;const k=G.friend,P=PLANTS[k];
   const s=easeBack(clamp(G.friendT/.6,0,1));
   txt(ctx,"新朋友！",LW/2,110,86,"#ffd43b","#ff6fa5",null,16);
   drawPlant(ctx,k,LW/2,520,2.4*s,t,{seed:1,timer:Math.sin(t*2)>0?9:.3,hp:1,max:1,bornT:1,hurtT:0,shootT:Math.sin(t*3)>.8?.1:0});
-  txt(ctx,P.name,LW/2,610,70,"#fff","#4fae3c",null,14);
+  txt(ctx,PN(k).name,LW/2,610,70,"#fff","#4fae3c",null,14);
   for(let i=0;i<3;i++)if(Math.random()<dt*4)parts.push({k:"spark",x:LW/2+rand(-260,260),y:rand(200,560),vx:0,vy:-30,g:0,life:1,max:1,size:rand(10,18),col:"#fff6a0"});
   updateParts(dt);drawParts(ctx,t);
   G.overT=G.friendT;
